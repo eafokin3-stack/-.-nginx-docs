@@ -85,3 +85,29 @@ curl -kI https://example.local
 ```
 
 [Screenshot: `nginx -t` → `syntax is ok`, `curl` → `200 OK`]
+
+## Параметры конфигурации
+
+| Параметр | Назначение |
+|---|---|
+| `listen 443 ssl` | Включает приём HTTPS-соединений |
+| `server_name` | Домен, для которого действует блок |
+| `ssl_certificate` / `ssl_certificate_key` | Пути к сертификату и ключу |
+| `proxy_pass` | Адрес backend-приложения |
+| `proxy_set_header Host` | Передаёт исходный `Host` на backend |
+| `proxy_set_header X-Real-IP` | Передаёт реальный IP клиента |
+| `proxy_set_header X-Forwarded-Proto` | Сообщает backend, что запрос был по HTTPS |
+
+## Troubleshooting
+
+**1. `Address already in use` на 443**
+Порт занят другим процессом. `sudo ss -tulpn | grep :443`, остановите
+конфликтующую службу (например, Apache) и перезапустите Nginx.
+
+**2. `502 Bad Gateway`**
+Backend недоступен. Проверьте `ss -tulpn | grep 8080`,
+`curl http://127.0.0.1:8080` и лог `/var/log/nginx/error.log`.
+
+**3. Предупреждение о недоверенном сертификате**
+Ожидаемо для self-signed. Для теста используйте `curl -k`; для
+production подключите сертификат от доверенного CA.
